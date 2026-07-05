@@ -46,6 +46,12 @@ jobs:
           # Set this repo variable in Settings -> Secrets and variables ->
           # Actions -> Variables once the backend has a live URL.
           VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
+          # Served at https://<user>.github.io/<repo>/ (no custom domain
+          # yet), so asset URLs need that subpath prefix or every JS/CSS
+          # request 404s and the page stays blank. Once a custom domain is
+          # in front (served from the root), delete this line so base goes
+          # back to the vite.config.ts default of "/".
+          VITE_BASE_PATH: /${{ github.event.repository.name }}/
 
       - uses: actions/configure-pages@v5
 

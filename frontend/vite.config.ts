@@ -4,6 +4,13 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  // GitHub Pages serves a project repo (no custom domain) under a subpath —
+  // https://<user>.github.io/<repo>/ — not the domain root, so asset URLs
+  // must be prefixed with that subpath or the browser 404s on every JS/CSS
+  // file and the page stays blank. Set VITE_BASE_PATH="/repo-name/" only for
+  // that build (see .github/workflows/deploy-frontend.yml); once a custom
+  // domain is in front (served from root), leave it unset so base stays "/".
+  base: process.env.VITE_BASE_PATH ?? '/',
   build: {
     // Monaco's editor core + full contribution set (suggest, hover, find,
     // folding, etc. — all needed for a usable editor) is inherently ~3MB and
