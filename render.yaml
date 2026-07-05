@@ -4,7 +4,10 @@ services:
     runtime: node
     plan: free
     rootDir: .
-    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm --filter @belajarsql/shared build && pnpm --filter @belajarsql/backend build
+    # No "corepack enable" — Render's Node image already ships pnpm at
+    # /usr/bin/pnpm, and corepack enable tries to overwrite that shim, which
+    # fails since that path is read-only on Render (EROFS).
+    buildCommand: pnpm install --frozen-lockfile && pnpm --filter @belajarsql/shared build && pnpm --filter @belajarsql/backend build
     startCommand: node backend/dist/server.js
     envVars:
       - key: NODE_ENV
