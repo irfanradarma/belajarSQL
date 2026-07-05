@@ -1,0 +1,54 @@
+/*
+  Theme tokens as CSS custom properties, switched via a single `data-theme`
+  attribute on <html>. This keeps a theme swap to one DOM attribute write
+  (no re-render cascade) — see src/lib/store/theme.ts for the switcher logic.
+  Monaco's own theme is not CSS-driven and must be switched in lockstep
+  (see src/lib/monaco/theme.ts).
+*/
+
+:root[data-theme="light"] {
+  --color-bg: #ffffff;
+  --color-surface: #f5f6f8;
+  --color-border: #d9dce1;
+  --color-fg: #1e1e1e;
+  --color-fg-muted: #6b7280;
+  --color-accent: #2563eb;
+  --color-accent-fg: #ffffff;
+  --color-danger: #dc2626;
+}
+
+:root[data-theme="dark"] {
+  --color-bg: #1e1e1e;
+  --color-surface: #252526;
+  --color-border: #3c3c3c;
+  --color-fg: #d4d4d4;
+  --color-fg-muted: #9ca3af;
+  --color-accent: #3b82f6;
+  --color-accent-fg: #ffffff;
+  --color-danger: #f87171;
+}
+
+/* SSMS-style theme: light editor surface, blue-grey chrome, classic SSMS accent blue. */
+:root[data-theme="ssms"] {
+  --color-bg: #eef2f7;
+  --color-surface: #ffffff;
+  --color-border: #c7d0dc;
+  --color-fg: #14213d;
+  --color-fg-muted: #4b5a75;
+  --color-accent: #0e639c;
+  --color-accent-fg: #ffffff;
+  --color-danger: #c0392b;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: system-ui, "Segoe UI", Roboto, sans-serif;
+}

@@ -1,0 +1,12 @@
+node_modules/
+# Incomplete/broken local clone artifact — the real remote is configured
+# directly on this (outer) repo instead; see README.md.
+/belajarSQL/
+dist/
+build/
+.env
+.env.local
+*.log
+.DS_Store
+.turbo/
+coverage/

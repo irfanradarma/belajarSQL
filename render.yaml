@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: belajarsql-backend
+    runtime: node
+    plan: free
+    rootDir: .
+    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm --filter @belajarsql/shared build && pnpm --filter @belajarsql/backend build
+    startCommand: node backend/dist/server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
