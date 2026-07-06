@@ -33,10 +33,24 @@ export async function queryRoutes(app: FastifyInstance): Promise<void> {
     // rendering rows before the query finishes and the row cap can be
     // enforced by simply stopping the stream.
     reply.hijack();
-    reply.raw.writeHead(200, {
+
+    // reply.hijack() bypasses Fastify's normal response pipeline entirely —
+    // including the @fastify/cors plugin's onSend hook that would otherwise
+    // add Access-Control-Allow-Origin. Preflight OPTIONS requests are
+    // answered by that plugin directly (unaffected by hijacking), but this
+    // actual POST response needs the header added by hand, or browsers
+    // reject it client-side (curl doesn't enforce CORS, so this was easy to
+    // miss when testing with curl instead of a real browser).
+    const origin = req.headers.origin;
+    const responseHeaders: Record<string, string> = {
       "Content-Type": "application/x-ndjson",
       "Cache-Control": "no-cache",
-    });
+      Vary: "Origin",
+    };
+    if (origin && env.CORS_ALLOWED_ORIGINS.includes(origin)) {
+      responseHeaders["Access-Control-Allow-Origin"] = origin;
+    }
+    reply.raw.writeHead(200, responseHeaders);
 
     let terminalFrameSent = false;
     const writeFrame = (frame: QueryStreamFrame) => {
