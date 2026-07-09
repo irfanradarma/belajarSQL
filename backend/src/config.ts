@@ -5,10 +5,9 @@ const envSchema = z.object({
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
   PORT: z.coerce.number().default(4000),
 
-  // Per-connection pool defaults — every session created via POST /api/connect
-  // gets its own pool built from the credentials the student supplied, using
-  // these as the tuning defaults (not a single fixed DB connection anymore).
-  DB_POOL_MAX: z.coerce.number().default(10),
+  // Per-connection tuning defaults — every session created via POST /api/connect
+  // gets its own single dedicated connection built from the credentials the
+  // student supplied (see sessionManager.ts), using these as the timeouts.
   DB_REQUEST_TIMEOUT_MS: z.coerce.number().default(15_000),
   DB_CONNECTION_TIMEOUT_MS: z.coerce.number().default(15_000),
   MAX_ROWS_DEFAULT: z.coerce.number().default(5000),

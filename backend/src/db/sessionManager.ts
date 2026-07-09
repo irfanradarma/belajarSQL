@@ -42,9 +42,16 @@ export async function createSession(params: ConnectParams): Promise<Session> {
       encrypt: params.encrypt ?? true,
       trustServerCertificate: params.trustServerCertificate ?? false,
     },
+    // Pinned to a single physical connection rather than a real pool. Local
+    // temp tables (#name) are scoped by SQL Server to the connection/SPID
+    // that created them — with more than one connection in play, queries
+    // could land on different SPIDs and temp tables would randomly appear
+    // to vanish. Pinning to one connection also means a student's temp
+    // tables are guaranteed invisible to every other session, even one
+    // using the same SQL login from a different computer.
     pool: {
-      max: env.DB_POOL_MAX,
-      min: 0,
+      max: 1,
+      min: 1,
       idleTimeoutMillis: 30_000,
     },
     requestTimeout: env.DB_REQUEST_TIMEOUT_MS,
