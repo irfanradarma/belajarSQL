@@ -4,6 +4,7 @@ import { executeQuery } from "../../lib/api";
 import { saveQueryAsSql } from "../../lib/saveQuery";
 import type { ResultColumn } from "../ResultGrid/VirtualizedResultGrid";
 import { ResultPane } from "../ResultGrid/ResultPane";
+import type { MonacoQueryEditorHandle } from "../Editor/MonacoQueryEditor";
 
 // Monaco (~2-3MB) is the single largest dependency in this app — code-split
 // it into its own chunk rather than the initial bundle so the app shell
@@ -36,6 +37,7 @@ export function QueryWorkspace({ initialSql = "", autoRun = false }: QueryWorksp
   const [sql, setSql] = useState(initialSql);
   const [execution, setExecution] = useState<ExecutionState>({ status: "idle" });
   const runningRef = useRef(false);
+  const editorRef = useRef<MonacoQueryEditorHandle>(null);
 
   // Buffer incoming rows and flush to React state on a timer rather than per
   // row — with a 5,000-row cap a naive setState-per-row would mean
@@ -99,7 +101,19 @@ export function QueryWorkspace({ initialSql = "", autoRun = false }: QueryWorksp
     }
   }, []);
 
-  const handleRunRequest = useCallback(() => {
+  // "Run Statement" — the button and Ctrl+Enter both execute just the
+  // selection (if any) or the statement chunk under the cursor, not the
+  // whole editor, so students can iterate on one query in a multi-query
+  // scratchpad without accidentally re-running everything above it.
+  const handleRunStatement = useCallback(
+    (chunkSql?: string) => {
+      const target = chunkSql ?? editorRef.current?.getRunTarget() ?? "";
+      void runQuery(target);
+    },
+    [runQuery],
+  );
+
+  const handleRunAll = useCallback(() => {
     void runQuery(sql);
   }, [runQuery, sql]);
 
@@ -125,11 +139,21 @@ export function QueryWorkspace({ initialSql = "", autoRun = false }: QueryWorksp
       <div className="flex items-center gap-2 border-b border-border px-3 py-1.5">
         <button
           type="button"
-          onClick={handleRunRequest}
+          onClick={() => handleRunStatement()}
           disabled={isRunning}
           className="rounded bg-accent px-3 py-1 text-xs font-medium text-accent-fg disabled:opacity-50"
+          title="Run the selected text, or the statement under the cursor"
         >
-          {isRunning ? "Running…" : "Run (Ctrl+Enter)"}
+          {isRunning ? "Running…" : "Run Statement (Ctrl+Enter)"}
+        </button>
+        <button
+          type="button"
+          onClick={handleRunAll}
+          disabled={isRunning}
+          className="rounded border border-border px-3 py-1 text-xs font-medium text-fg hover:bg-accent/10 disabled:opacity-50"
+          title="Run the entire editor contents"
+        >
+          Run All (Ctrl+Shift+Enter)
         </button>
         <button
           type="button"
@@ -150,7 +174,13 @@ export function QueryWorkspace({ initialSql = "", autoRun = false }: QueryWorksp
             </div>
           }
         >
-          <MonacoQueryEditor value={sql} onChange={setSql} onRunRequest={handleRunRequest} />
+          <MonacoQueryEditor
+            ref={editorRef}
+            value={sql}
+            onChange={setSql}
+            onRunStatement={handleRunStatement}
+            onRunAll={handleRunAll}
+          />
         </Suspense>
       </div>
 
