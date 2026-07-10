@@ -8,7 +8,12 @@ const envSchema = z.object({
   // Per-connection tuning defaults — every session created via POST /api/connect
   // gets its own single dedicated connection built from the credentials the
   // student supplied (see sessionManager.ts), using these as the timeouts.
-  DB_REQUEST_TIMEOUT_MS: z.coerce.number().default(15_000),
+  // 60s (not the tighter 15s this started at) because legitimate classroom
+  // analytical queries — GROUP BY/HAVING with COUNT(DISTINCT), self-joins —
+  // routinely take longer than 15s on a shared, modest-spec training
+  // instance; since each session holds its own dedicated connection (not a
+  // shared pool), one slow query only ties up that one student's session.
+  DB_REQUEST_TIMEOUT_MS: z.coerce.number().default(60_000),
   DB_CONNECTION_TIMEOUT_MS: z.coerce.number().default(15_000),
   MAX_ROWS_DEFAULT: z.coerce.number().default(5000),
   MAX_ROWS_HARD_CAP: z.coerce.number().default(20_000),

@@ -14,3 +14,8 @@ services:
         value: production
       - key: CORS_ALLOWED_ORIGINS
         sync: false
+      # Explicit here (rather than left to the backend/src/config.ts default)
+      # so the production statement timeout is visible without digging
+      # through source — see config.ts for why 60s.
+      - key: DB_REQUEST_TIMEOUT_MS
+        value: "60000"
