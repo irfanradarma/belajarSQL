@@ -16,6 +16,6 @@ services:
         sync: false
       # Explicit here (rather than left to the backend/src/config.ts default)
       # so the production statement timeout is visible without digging
-      # through source — see config.ts for why 60s.
+      # through source — see config.ts for why 120s.
       - key: DB_REQUEST_TIMEOUT_MS
-        value: "60000"
+        value: "120000"
