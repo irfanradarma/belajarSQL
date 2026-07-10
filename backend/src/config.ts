@@ -23,8 +23,13 @@ const envSchema = z.object({
 
   // A session with no requests for this long has its pool closed and is
   // forgotten — protects against students who wander off leaving a live
-  // connection (and a SQL Server login) held open indefinitely.
-  SESSION_IDLE_TIMEOUT_MS: z.coerce.number().default(30 * 60 * 1000),
+  // connection (and a SQL Server login) held open indefinitely. Shortened
+  // from 30 minutes: the shared training instance runs SQL Server Express
+  // on a db.t3.micro (995MB total RAM, max server memory capped at 725MB),
+  // so an idle connection quietly sitting on a slice of that tiny budget for
+  // half an hour is a real cost with 60+ concurrent students, not just
+  // theoretical waste.
+  SESSION_IDLE_TIMEOUT_MS: z.coerce.number().default(10 * 60 * 1000),
 
   CORS_ALLOWED_ORIGINS: z
     .string()
